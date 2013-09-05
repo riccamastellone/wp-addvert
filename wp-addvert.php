@@ -2,7 +2,7 @@
 /*
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
-  Description: Aggiunge i meta tag necessari al funzionamento di Addvert
+  Description: Aggiunge i meta tag necessari al funzionamento di Addvert.
   Version: 1.0
   Author: Riccardo Mastellone
  */
@@ -22,10 +22,13 @@ class Addvert_Plugin {
         } else {
             add_action('wp_head', array($this, 'add_elements'));
             add_action('wp_enqueue_scripts', array($this, 'addvert_enqueue_scripts'));
-            add_action( 'woocommerce_single_product_summary', array($this, 'show_addvert_button' ), 8 );
+            add_action('woocommerce_single_product_summary', array($this, 'show_addvert_button' ), 8 );
         }
     }
-
+    
+    /**
+     * Impediamo che il plugin venga attivato senza WooCommerce
+     */
     function woo_check() {
         if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
             $plugin = plugin_basename(__FILE__);
@@ -33,7 +36,10 @@ class Addvert_Plugin {
             wp_die("Addvert ha bisogno che WooCommerce sia attivo!");
         }
     }
-
+    
+    /**
+     * Quando avremo l'url definitivo userei l'url. Magari su CDN?
+     */
     function addvert_enqueue_scripts() {
         if (is_product()) {
             wp_enqueue_script('addvert-js', plugins_url('/addvert-btn.js', __FILE__), array(), '1.0.0', true);
@@ -41,7 +47,6 @@ class Addvert_Plugin {
     }
     
     function show_addvert_button() {
-        
         echo '<div class="addvert-btn" data-width="450"></div>';
     }
     
