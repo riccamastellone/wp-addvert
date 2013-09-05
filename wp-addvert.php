@@ -23,7 +23,13 @@ class Addvert_Plugin {
             add_action('wp_head', array($this, 'add_elements'));
             add_action('wp_enqueue_scripts', array($this, 'addvert_enqueue_scripts'));
             add_action('woocommerce_single_product_summary', array($this, 'show_addvert_button' ), 8 );
+            add_action ('woocommerce_checkout_order_processed', array( $this, 'addvert_tracking' ) );
+            
         }
+    }
+    
+    function addvert_tracking() {
+        // DO SOMETHING
     }
     
     /**
