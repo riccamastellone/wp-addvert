@@ -16,10 +16,19 @@ class Addvert_Plugin {
         register_activation_hook(__FILE__, array($this, 'addvert_add_defaults'));
 
         if (is_admin()) {
+            add_action('admin_init', array($this, 'woo_check'));
             add_action('admin_init', array($this, 'addvert_init'));
             add_action('admin_menu', array($this, 'addvert_add_options_page'));
         } else {
             add_action('wp_head', array($this, 'add_elements'));
+        }
+    }
+
+    function woo_check() {
+        if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
+            $plugin = plugin_basename(__FILE__);
+            deactivate_plugins($plugin);
+            wp_die("Addvert ha bisogno che WooCommerce sia attivo!");
         }
     }
 
@@ -49,7 +58,7 @@ class Addvert_Plugin {
     }
 
     function addvert_add_options_page() {
-        add_menu_page('Addvert', 'Addvert', 'manage_options', __FILE__, array($this, 'addvert_render_form'),  plugin_dir_url( __FILE__ ).'icon.png');
+        add_menu_page('Addvert', 'Addvert', 'manage_options', __FILE__, array($this, 'addvert_render_form'), plugin_dir_url(__FILE__) . 'icon.png');
     }
 
     public function add_elements() {
