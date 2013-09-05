@@ -22,6 +22,7 @@ class Addvert_Plugin {
         } else {
             add_action('wp_head', array($this, 'add_elements'));
             add_action('wp_enqueue_scripts', array($this, 'addvert_enqueue_scripts'));
+            add_action( 'woocommerce_single_product_summary', array($this, 'show_addvert_button' ), 8 );
         }
     }
 
@@ -38,6 +39,12 @@ class Addvert_Plugin {
             wp_enqueue_script('addvert-js', plugins_url('/addvert-btn.js', __FILE__), array(), '1.0.0', true);
         }
     }
+    
+    function show_addvert_button() {
+        
+        echo '<div class="addvert-btn" data-width="450"></div>';
+    }
+    
 
     function addvert_validate_options($input) {
         return $input;
