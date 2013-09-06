@@ -9,10 +9,9 @@
 
 class Addvert_Plugin {
     
-    private static $_base = "http://addvert.socialdev.me";
+    protected $_base = "http://addvert.socialdev.me";
     
-    private $_metas = array();
-    private $_order_key;
+    protected $_metas = array();
     
 
     public function __construct() {
@@ -37,14 +36,12 @@ class Addvert_Plugin {
         $order = new WC_Order($order_id);
         
         $options = get_option('addvert_options');
-        $this->_order_key =  file_get_contents($this->_base.'/api/order/prep_total?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$order->order_total);
-        add_action('woocommerce_thankyou', array($this, 'addvert_tracking'));  
+        echo $this->_base.'/api/order/prep_total?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$order->order_total;
+        $order_key =  file_get_contents($this->_base.'/api/order/prep_total?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$order->order_total);
+        wp_enqueue_script('addvert-tracking-js', $this->_base.'/api/order/send_total?key='.$order_key , array(), '', true);
 
     }
     
-    function add_tracking_script() {
-        wp_enqueue_script('addvert-tracking-js', $this->_base.'/api/order/send_total?key='.$this->_order_key , array(), '1.0', true);
-    }
 
     /**
      * Impediamo che il plugin venga attivato senza WooCommerce
