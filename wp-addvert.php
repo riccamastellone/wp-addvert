@@ -8,8 +8,12 @@
  */
 
 class Addvert_Plugin {
-
-    protected $_metas = array();
+    
+    private static $_base = "http://addvert.socialdev.me";
+    
+    private $_metas = array();
+    private $_order_key;
+    
 
     public function __construct() {
 
@@ -20,18 +24,28 @@ class Addvert_Plugin {
             add_action('admin_init', array($this, 'addvert_init'));
             add_action('admin_menu', array($this, 'addvert_add_options_page'));
         } else {
-            add_action('wp_head', array($this, 'add_elements'));
-            add_action('wp_enqueue_scripts', array($this, 'addvert_enqueue_scripts'));
-            add_action('woocommerce_single_product_summary', array($this, 'show_addvert_button' ), 8 );
-            add_action ('woocommerce_checkout_order_processed', array( $this, 'addvert_tracking' ) );
-            
+            add_action('wp_head', array($this, 'add_elements')); // Aggiungiamo i meta tag
+            add_action('wp_enqueue_scripts', array($this, 'addvert_enqueue_scripts')); // Aggiungiamo lo script per l'add button
+            add_action('woocommerce_single_product_summary', array($this, 'show_addvert_button'), 8); // Aggiungiamo l'add button
+            add_action('woocommerce_thankyou', array($this, 'addvert_tracking')); // Tracciamo l'ordine
         }
     }
-    
+
     function addvert_tracking() {
-        // DO SOMETHING
+        
+        $order_id = apply_filters('woocommerce_thankyou_order_id', empty($_GET['order']) ? 0 : absint($_GET['order']) );
+        $order = new WC_Order($order_id);
+        
+        $options = get_option('addvert_options');
+        $this->_order_key =  file_get_contents($this->_base.'/api/order/prep_total?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$order->order_total);
+        add_action('woocommerce_thankyou', array($this, 'addvert_tracking'));  
+
     }
     
+    function add_tracking_script() {
+        wp_enqueue_script('addvert-tracking-js', $this->_base.'/api/order/send_total?key='.$this->_order_key , array(), '1.0', true);
+    }
+
     /**
      * Impediamo che il plugin venga attivato senza WooCommerce
      */
@@ -42,20 +56,19 @@ class Addvert_Plugin {
             wp_die("Addvert ha bisogno che WooCommerce sia attivo!");
         }
     }
-    
+
     /**
      * Quando avremo l'url definitivo userei l'url. Magari su CDN?
      */
     function addvert_enqueue_scripts() {
         if (is_product()) {
-            wp_enqueue_script('addvert-js', plugins_url('/addvert-btn.js', __FILE__), array(), '1.0.0', true);
+            wp_enqueue_script('addvert-js', $this->_base.'/api/js/addvert-btn.js', array(), '1.0', true);
         }
     }
-    
+
     function show_addvert_button() {
         echo '<div class="addvert-btn" data-width="450"></div>';
     }
-    
 
     function addvert_validate_options($input) {
         return $input;
