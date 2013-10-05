@@ -15,6 +15,7 @@ This plugin allows your WooCommerce to communicate with Addvert affiliation webs
 Easily integrate [Addvert](http://addvert.it) to your WooCommerce website without any coding!
 
 What does this plugin do :
+
 * Add some Open Graph meta tags to the single products page
 * Make a callback at the and of and order sending the id of the order and the total amount to Addvert
 
@@ -24,8 +25,8 @@ Refer to [Addvert Documentation](http://addvert.it/api/doc) for more details
 == Installation ==
 
 1. Upload `plugin-name.php` to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Click 'Addvert' in the left menu and type in the E-Commerce ID and the Secret Key provided by Addvert
+1. Activate the plugin through the 'Plugins' menu in WordPress
+1. Click 'Addvert' in the left menu and type in the E-Commerce ID and the Secret Key provided by Addvert
 
 == Frequently asked questions ==
 
