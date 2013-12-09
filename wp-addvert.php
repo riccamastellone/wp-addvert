@@ -9,7 +9,7 @@
 
 class Addvert_Plugin {
     
-    protected $_base = "http://addvert.socialdev.me";
+    protected $_base = "http://addvert.it";
     
     protected $_metas = array();
     
