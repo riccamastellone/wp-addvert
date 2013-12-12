@@ -10,7 +10,8 @@
 class Addvert_Plugin {
 
     protected $_base = "http://addvert.it";
-    protected $_metas = array();
+    protected $_meta_properties = array();
+    protected $_meta_names = array();
 
     public function __construct() {
 
@@ -98,42 +99,56 @@ class Addvert_Plugin {
         if (is_product()) {
 
             $product = new WC_Product_External(get_the_ID());
-            $this->_metas['og:title'] = $product->post->post_title;
-            $this->_metas['og:type'] = 'addvert:product';
-            $this->_metas['og:url'] = get_permalink();
-
-            $this->_metas['og:description'] = $product->post->post_excerpt ? $product->post->post_excerpt : $product->post->post_content;
-            $this->_metas['og:site_name'] = strip_tags(get_bloginfo('name'));
-            $this->_metas['og:locale'] = strtolower(str_replace('-', '_', get_bloginfo('language')));
-
+            
+            $this->_meta_properties['og:url'] = get_permalink();
+            $this->_meta_properties['og:title'] = $product->post->post_title;
+            $this->_meta_properties['og:description'] = $product->post->post_excerpt ? $product->post->post_excerpt : $product->post->post_content;
             if (has_post_thumbnail()) {
-                $this->_metas['og:image'] = wp_get_attachment_url(get_post_thumbnail_id());
+                $this->_meta_properties['og:image'] = wp_get_attachment_url(get_post_thumbnail_id());
             }
 
+            $this->_meta_names['addvert:type'] = 'product';
+            
+
+            
+            $this->_meta_properties['og:site_name'] = strip_tags(get_bloginfo('name'));
+            $this->_meta_properties['og:locale'] = strtolower(str_replace('-', '_', get_bloginfo('language')));
+
+            
             $options = get_option('addvert_options');
-            $this->_metas['addvert:ecommerce_id'] = $options['addvert_id'];
+            $this->_meta_names['addvert:ecommerce_id'] = $options['addvert_id'];
 
             $cat = wp_get_object_terms(get_the_ID(), 'product_cat');
-            $this->_metas['addvert:category'] = !empty($cat) ? $cat[0]->name : '';
+            $this->_meta_names['addvert:category'] = !empty($cat) ? $cat[0]->name : '';
 
-            $this->_metas['addvert:price'] = $product->get_price();
+            $this->_meta_names['addvert:price'] = $product->get_price();
 
             $tags = wp_get_object_terms(get_the_ID(), 'product_tag');
             foreach ($tags as $tag) {
-                $this->_metas['addvert:tag'][] = $tag->name;
+                $this->_meta_names['addvert:tag'][] = $tag->name;
             }
             $this->render_output();
         }
     }
 
     protected function render_output() {
-        foreach ($this->_metas as $property => $content) {
+        echo "\n<!-- Addvert Meta Tags | addvert.it -->\n";
+        foreach ($this->_meta_properties as $property => $content) {
             $content = is_array($content) ? $content : array($content);
 
             foreach ($content as $content_single) {
                 echo '<meta property="' . $property . '" content="' . esc_attr(trim($content_single)) . '" />' . "\n";
             }
         }
+        
+        foreach ($this->_meta_names as $property => $content) {
+            $content = is_array($content) ? $content : array($content);
+
+            foreach ($content as $content_single) {
+                echo '<meta name="' . $property . '" content="' . esc_attr(trim($content_single)) . '" />' . "\n";
+            }
+        }
+        echo '<!-- End Addvert Meta Tags -->';
     }
 
     function addvert_render_form() {
