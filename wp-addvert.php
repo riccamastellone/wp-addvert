@@ -3,16 +3,14 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.1
+  Version: 1.2
   Author: Riccardo Mastellone
  */
 
 class Addvert_Plugin {
-    
+
     protected $_base = "http://addvert.it";
-    
     protected $_metas = array();
-    
 
     public function __construct() {
 
@@ -29,6 +27,7 @@ class Addvert_Plugin {
             add_action('woocommerce_thankyou', array($this, 'addvert_tracking')); // Tracciamo l'ordine
         }
     }
+
     /**
      * Recuperiamo i dati dell'ordine, chiediamo ad Addvert la chiave e inseriamo lo script nella pagina
      */
@@ -36,11 +35,9 @@ class Addvert_Plugin {
         $order_id = apply_filters('woocommerce_thankyou_order_id', empty($_GET['order']) ? 0 : absint($_GET['order']) );
         $order = new WC_Order($order_id);
         $options = get_option('addvert_options');
-        $order_key =  file_get_contents($this->_base.'/api/order/prep_total?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$order->order_total);
-        wp_enqueue_script('addvert-tracking-js', $this->_base.'/api/order/send_total?key='.$order_key , array(), '', true);
-
+        $order_key = file_get_contents($this->_base . '/api/order/prep_total?ecommerce_id=' . $options['addvert_id'] . '&secret=' . $options['addvert_secret'] . '&tracking_id=' . $order_id . '&total=' . $order->order_total);
+        wp_enqueue_script('addvert-tracking-js', $this->_base . '/api/order/send_total?key=' . $order_key, array(), '', true);
     }
-    
 
     /**
      * Impediamo che il plugin venga attivato senza WooCommerce
@@ -58,12 +55,13 @@ class Addvert_Plugin {
      */
     function addvert_enqueue_scripts() {
         if (is_product()) {
-            wp_enqueue_script('addvert-js', $this->_base.'/api/js/addvert-btn.js', array(), '1.0', true);
+            wp_enqueue_script('addvert-js', $this->_base . '/api/js/addvert-btn.js', array(), '1.0', true);
         }
     }
 
     function show_addvert_button() {
-        echo '<div class="addvert-btn" data-width="450"></div>';
+        $options = get_option('addvert_options');
+        echo '<div class="addvert-btn" data-width="450" data-layout="'.$options['addvert_layout'].'"></div>';
     }
 
     function addvert_validate_options($input) {
@@ -73,7 +71,8 @@ class Addvert_Plugin {
     function addvert_get_defaults() {
         return array(
             "addvert_id" => NULL,
-            "addvert_secret" => NULL
+            "addvert_secret" => NULL,
+            "addvert_layout" => 'standard'
         );
     }
 
@@ -145,9 +144,9 @@ class Addvert_Plugin {
             <h2><a href="http://addvert.it">Addvert</a> WP Plugin</h2>
             <p>L'ID e la chiave sono visibili nella pagina Account del proprio account e-commerce su Addvert</p>
             <form method="post" action="options.php">
-                <?php settings_fields('addvert_plugin_options'); ?>
-                <?php $options = get_option('addvert_options');
-                ?>
+        <?php settings_fields('addvert_plugin_options'); ?>
+        <?php $options = get_option('addvert_options');
+        ?>
                 <table class="form-table">
                     <tr>
                         <th scope="row">ID E-Commerce</th>
@@ -159,6 +158,13 @@ class Addvert_Plugin {
                         <th scope="row">Chiave Segreta</th>
                         <td>
                             <input name="addvert_options[addvert_secret]" type='text' value='<?php echo $options['addvert_secret'] ?>'/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Scegli il bottone che vuoi utilizzare</th>
+                        <td>
+                             <input style="position: relative;bottom: 15px;" type="radio" name="addvert_options[addvert_layout]" value="standard" <?php if($options['addvert_layout']== 'standard') echo 'checked="checked"';?>/><img src="<?php echo plugins_url( '/button_standard.png', __FILE__ ) ?>"><br>
+                              <input style="position: relative;bottom: 15px;" type="radio" name="addvert_options[addvert_layout]" value="small" <?php if($options['addvert_layout']== 'small') echo 'checked="checked"';?>/> <img src="<?php echo plugins_url( '/button_small.png', __FILE__ ) ?>">
                         </td>
                     </tr>
                 </table>
