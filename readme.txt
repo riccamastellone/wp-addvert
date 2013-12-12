@@ -3,8 +3,8 @@ Contributors: riccardo.mastellone
 Donate link: 
 Tags: addvert, ecommerce
 Requires at least: 3.3
-Tested up to: 3.6.1
-Stable tag: 1.1
+Tested up to: 3.7.1
+Stable tag: 1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,3 +37,13 @@ Visit [http://addvert.it/ecommerce](http://addvert.it/ecommerce) and signup!
 == Screenshots ==
 
 1. WP-Addvert settings page
+
+
+== Changelog ==
+ 
+= 1.2 =
+* New feature: choose the Addvert button layout you prefer!
+* Improvement: Updated for newer version of Addvert documentation
+ 
+= 1.1 =
+* First public release
