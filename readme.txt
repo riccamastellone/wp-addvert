@@ -4,7 +4,7 @@ Donate link:
 Tags: addvert, ecommerce
 Requires at least: 3.3
 Tested up to: 3.7.1
-Stable tag: 1.2
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ Visit [http://addvert.it/ecommerce](http://addvert.it/ecommerce) and signup!
 
 
 == Changelog ==
+ 
+= 1.2.1 =
+* Fix: Order total now escludes shipping fees 
  
 = 1.2 =
 * New feature: choose the Addvert button layout you prefer!

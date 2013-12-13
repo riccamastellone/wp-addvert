@@ -3,7 +3,7 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.2
+  Version: 1.2.1
   Author: Riccardo Mastellone
  */
 
@@ -36,7 +36,9 @@ class Addvert_Plugin {
         $order_id = apply_filters('woocommerce_thankyou_order_id', empty($_GET['order']) ? 0 : absint($_GET['order']) );
         $order = new WC_Order($order_id);
         $options = get_option('addvert_options');
-        $order_key = file_get_contents($this->_base . '/api/order/prep_total?ecommerce_id=' . $options['addvert_id'] . '&secret=' . $options['addvert_secret'] . '&tracking_id=' . $order_id . '&total=' . $order->order_total);
+        // Calcoliamo la commissione sul totale dell'ordine senza le spese di spedizione
+        $totale = $order->order_total - $order->order_shipping;
+        $order_key = file_get_contents($this->_base . '/api/order/prep_total?ecommerce_id=' . $options['addvert_id'] . '&secret=' . $options['addvert_secret'] . '&tracking_id=' . $order_id . '&total=' . $totale);
         wp_enqueue_script('addvert-tracking-js', $this->_base . '/api/order/send_total?key=' . $order_key, array(), '', true);
     }
 
