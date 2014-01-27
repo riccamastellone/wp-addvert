@@ -16,19 +16,32 @@ class Addvert_Plugin {
     public function __construct() {
 
         register_activation_hook(__FILE__, array($this, 'addvert_add_defaults'));
-
+          
         if (is_admin()) {
             add_action('admin_init', array($this, 'woo_check'));
             add_action('admin_init', array($this, 'addvert_init'));
             add_action('admin_menu', array($this, 'addvert_add_options_page'));
         } else {
+            add_action('init',array($this, 'register_session'));
             add_action('wp_head', array($this, 'add_elements')); // Aggiungiamo i meta tag
             add_action('wp_enqueue_scripts', array($this, 'addvert_enqueue_scripts')); // Aggiungiamo lo script per l'add button
             add_action('woocommerce_single_product_summary', array($this, 'show_addvert_button'), 8); // Aggiungiamo l'add button
             add_action('woocommerce_thankyou', array($this, 'addvert_tracking')); // Tracciamo l'ordine
         }
     }
-
+    
+    /**
+     * Salviamo il parametro, se presente, in sessione
+     */
+    function register_session(){
+        if( !session_id()) {
+            session_start();
+        }
+        if(!empty($_GET['addvert_token'])) {
+            $_SESSION['addvert_token'] = $_GET['addvert_token'];
+        }
+    }
+   
     /**
      * Recuperiamo i dati dell'ordine, chiediamo ad Addvert la chiave e inseriamo lo script nella pagina
      */
@@ -38,8 +51,17 @@ class Addvert_Plugin {
         $options = get_option('addvert_options');
         // Calcoliamo la commissione sul totale dell'ordine senza le spese di spedizione
         $totale = $order->order_total - $order->order_shipping;
-        $order_key = file_get_contents($this->_base . '/api/order/prep_total?ecommerce_id=' . $options['addvert_id'] . '&secret=' . $options['addvert_secret'] . '&tracking_id=' . $order_id . '&total=' . $totale);
-        wp_enqueue_script('addvert-tracking-js', $this->_base . '/api/order/send_total?key=' . $order_key, array(), '', true);
+        
+        // Facciamo la chiamata server side con il metodo token
+        if(!empty($_SESSION['addvert_token'])) {
+            file_get_contents($this->_base . '/api/order/send_order?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$totale.'&token='.$_SESSION['addvert_token']);
+            unset($_SESSION['addvert_token']);
+          }
+  
+        // METODO LEGACY
+        // Facchiamo la chiamata server side con il metodo cookie
+        //$order_key = file_get_contents($this->_base . '/api/order/prep_total?ecommerce_id=' . $options['addvert_id'] . '&secret=' . $options['addvert_secret'] . '&tracking_id=' . $order_id . '&total=' . $totale);
+        //wp_enqueue_script('addvert-tracking-js', $this->_base . '/api/order/send_total?key=' . $order_key, array(), '', true);
     }
 
     /**
