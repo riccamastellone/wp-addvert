@@ -3,7 +3,7 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.2.1
+  Version: 1.3
   Author: Riccardo Mastellone
  */
 
