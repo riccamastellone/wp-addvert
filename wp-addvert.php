@@ -3,13 +3,15 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.3.1
+  Version: 1.4
   Author: Riccardo Mastellone
  */
 
 class Addvert_Plugin {
-
-    protected $_base = "http://addvert.it";
+    
+    const version = "1.4";
+    
+    protected $_base = "//addvert.it";
     protected $_meta_properties = array();
     protected $_meta_names = array();
 
@@ -41,6 +43,28 @@ class Addvert_Plugin {
             $_SESSION['addvert_token'] = $_GET['addvert_token'];
         }
     }
+    
+    /**
+     * Controlliamo se possiamo usara una connessione sicura
+     * @return boolean
+     */
+    static private function check_ssl() {
+	$w = stream_get_wrappers();
+	if(extension_loaded  ('openssl') && in_array('https', $w)) {
+            return TRUE;
+        }    
+        else {
+            return FALSE;
+        }  
+    }
+    
+    /**
+     * Controlliamo se possiamo usare Curl
+     * @return boolean
+     */
+    static private function use_curl() {
+	return is_callable('curl_init');
+    }
    
     /**
      * Recuperiamo i dati dell'ordine, chiediamo ad Addvert la chiave e inseriamo lo script nella pagina
@@ -54,14 +78,27 @@ class Addvert_Plugin {
         
         // Facciamo la chiamata server side con il metodo token
         if(!empty($_SESSION['addvert_token'])) {
-            file_get_contents($this->_base . '/api/order/send_order?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$totale.'&token='.$_SESSION['addvert_token']);
+            
+            $wrapper = self::check_ssl() ? 'https:' : 'http:';
+            $url = $wrapper . $this->_base . '/api/order/send_order?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$totale.'&token='.$_SESSION['addvert_token'];
+            
+            if(self::use_curl()) {
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch,CURLOPT_USERAGENT,'WP-Addvert '.self::version);
+                // Non ci interessa avere il contenuto ritornato
+                curl_exec($ch);
+            } else {
+               file_get_contents($url); 
+            }
+            
             unset($_SESSION['addvert_token']);
           }
   
         // METODO LEGACY
         // Facchiamo la chiamata server side con il metodo cookie
-        //$order_key = file_get_contents($this->_base . '/api/order/prep_total?ecommerce_id=' . $options['addvert_id'] . '&secret=' . $options['addvert_secret'] . '&tracking_id=' . $order_id . '&total=' . $totale);
-        //wp_enqueue_script('addvert-tracking-js', $this->_base . '/api/order/send_total?key=' . $order_key, array(), '', true);
+        // $order_key = file_get_contents($this->_base . '/api/order/prep_total?ecommerce_id=' . $options['addvert_id'] . '&secret=' . $options['addvert_secret'] . '&tracking_id=' . $order_id . '&total=' . $totale);
+        // wp_enqueue_script('addvert-tracking-js', $this->_base . '/api/order/send_total?key=' . $order_key, array(), '', true);
     }
 
     /**
@@ -80,6 +117,8 @@ class Addvert_Plugin {
      */
     function addvert_enqueue_scripts() {
         if (is_product()) {
+            // wp_enqueue_script supporta anche il pattern '//' per lasciare al browser la decisione 
+            // se usare http o https
             wp_enqueue_script('addvert-js', $this->_base . '/api/js/addvert-btn.js', array(), '1.0', true);
         }
     }

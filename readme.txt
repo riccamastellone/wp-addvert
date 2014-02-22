@@ -3,8 +3,8 @@ Contributors: riccardo.mastellone
 Donate link: 
 Tags: addvert, ecommerce
 Requires at least: 3.3
-Tested up to: 3.8
-Stable tag: 1.3.1
+Tested up to: 3.8.1
+Stable tag: 1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,11 @@ Visit [http://addvert.it/ecommerce](http://addvert.it/ecommerce) and signup!
 
 == Changelog ==
  
+= 1.4 =
+* Let the browser choose which connection to use for the button (http / https) to avoid unsecure elements on secure pages
+* We now check if curl is available and prefer it over file_get_contents()
+* If https/open_ssl are available, we now use a secure connection to send the order details to Addvert
+
 = 1.3.1 =
 * Updated compatibility for WooCommerce up to 2.1.2
   
