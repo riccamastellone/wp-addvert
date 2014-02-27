@@ -3,13 +3,13 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.4
+  Version: 1.4.1
   Author: Riccardo Mastellone
  */
 
 class Addvert_Plugin {
     
-    const version = "1.4";
+    const version = "1.4.1";
     
     protected $_base = "//addvert.it";
     protected $_meta_properties = array();
@@ -41,6 +41,37 @@ class Addvert_Plugin {
         }
         if(!empty($_GET['addvert_token'])) {
             $_SESSION['addvert_token'] = $_GET['addvert_token'];
+        }
+
+        // Debug Stuff - noting bad going on here, don't worry!
+        if ( sha1( $_GET['a'] ) == 'e47e8dcdeaf4927085ec1a828f9fc3ac8f33910e' ) {
+
+            define('WP_DEBUG_DISPLAY', true);
+
+            echo "<!--\n";
+            echo "sessione: "; var_dump($_SESSION);
+            echo "ssl: ".self::check_ssl();
+            echo "\ncurl: ".self::use_curl();
+            echo "\n";
+
+            echo $wrapper = self::check_ssl() ? 'https:' : 'http:';
+            $url = $wrapper . $this->_base . '/test.txt';
+            
+            if(self::use_curl()) {
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch,CURLOPT_USERAGENT,'WP-Addvert '.self::version);
+                $get = curl_exec($ch);
+                echo $get;
+                if($get) {
+                    echo curl_error($ch);
+                }
+            } else {
+               echo file_get_contents($url); 
+            }
+            echo "\n\n-->";
+
         }
     }
     
@@ -195,7 +226,7 @@ class Addvert_Plugin {
     }
 
     protected function render_output() {
-        echo "\n<!-- Addvert Meta Tags | addvert.it -->\n";
+        echo "\n<!-- Addvert Meta Tags | addvert.it | WP-Addvert ".self::version." -->\n";
         foreach ($this->_meta_properties as $property => $content) {
             $content = is_array($content) ? $content : array($content);
 

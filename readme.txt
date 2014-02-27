@@ -4,7 +4,7 @@ Donate link:
 Tags: addvert, ecommerce
 Requires at least: 3.3
 Tested up to: 3.8.1
-Stable tag: 1.4
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ Visit [http://addvert.it/ecommerce](http://addvert.it/ecommerce) and signup!
 
 == Changelog ==
  
+= 1.4.1 =
+Debug tools to help us help you!
+
 = 1.4 =
 * Let the browser choose which connection to use for the button (http / https) to avoid unsecure elements on secure pages
 * We now check if curl is available and prefer it over file_get_contents()
