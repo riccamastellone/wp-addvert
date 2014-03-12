@@ -3,13 +3,13 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.4.1
+  Version: 1.5
   Author: Riccardo Mastellone
  */
 
 class Addvert_Plugin {
     
-    const version = "1.4.1";
+    const version = "1.5";
     
     protected $_base = "//addvert.it";
     protected $_meta_properties = array();
@@ -18,7 +18,11 @@ class Addvert_Plugin {
     public function __construct() {
 
         register_activation_hook(__FILE__, array($this, 'addvert_add_defaults'));
-          
+        
+        add_action('woocommerce_order_status_completed', array($this, 'addvert_tracking')); // Tracciamo l'ordine
+        add_action('woocommerce_payment_complete', array($this, 'addvert_tracking')); // Tracciamo l'ordine
+        add_action('woocommerce_checkout_update_order_meta', array($this, 'store_token')); // Token come meta dell'ordine
+
         if (is_admin()) {
             add_action('admin_init', array($this, 'woo_check'));
             add_action('admin_init', array($this, 'addvert_init'));
@@ -28,23 +32,34 @@ class Addvert_Plugin {
             add_action('wp_head', array($this, 'add_elements')); // Aggiungiamo i meta tag
             add_action('wp_enqueue_scripts', array($this, 'addvert_enqueue_scripts')); // Aggiungiamo lo script per l'add button
             add_action('woocommerce_single_product_summary', array($this, 'show_addvert_button'), 8); // Aggiungiamo l'add button
-            add_action('woocommerce_thankyou', array($this, 'addvert_tracking')); // Tracciamo l'ordine
         }
+    }
+    /**
+     * Salviamo il token come meta dell'ordine
+     */
+    function store_token($order_id) {
+        $customer = new WC_Customer();
+        
+        if($customer->addvert_token) {
+            update_post_meta( $order_id, '_addvert_token', $customer->addvert_token );
+            $customer->__set('addvert_token', NULL);
+        } else {
+            update_post_meta( $order_id, '_addvert_token', NULL );
+        }
+        
     }
     
     /**
      * Salviamo il parametro, se presente, in sessione
      */
     function register_session(){
-        if( !session_id()) {
-            session_start();
-        }
         if(!empty($_GET['addvert_token'])) {
-            $_SESSION['addvert_token'] = $_GET['addvert_token'];
+            $customer = new WC_Customer();
+            $customer->__set('addvert_token', $_GET['addvert_token']);
         }
 
         // Debug Stuff - noting bad going on here, don't worry!
-        if ( sha1( $_GET['a'] ) == 'e47e8dcdeaf4927085ec1a828f9fc3ac8f33910e' ) {
+        if ( isset($_GET['a']) && sha1( $_GET['a'] ) == 'e47e8dcdeaf4927085ec1a828f9fc3ac8f33910e' ) {
 
             define('WP_DEBUG_DISPLAY', true);
 
@@ -80,13 +95,13 @@ class Addvert_Plugin {
      * @return boolean
      */
     static private function check_ssl() {
-	$w = stream_get_wrappers();
-	if(extension_loaded  ('openssl') && in_array('https', $w)) {
-            return TRUE;
-        }    
-        else {
-            return FALSE;
-        }  
+    	$w = stream_get_wrappers();
+    	if(extension_loaded  ('openssl') && in_array('https', $w)) {
+                return TRUE;
+            }    
+            else {
+                return FALSE;
+            }  
     }
     
     /**
@@ -94,7 +109,7 @@ class Addvert_Plugin {
      * @return boolean
      */
     static private function use_curl() {
-	return is_callable('curl_init');
+	   return is_callable('curl_init');
     }
    
     /**
@@ -106,12 +121,15 @@ class Addvert_Plugin {
         $options = get_option('addvert_options');
         // Calcoliamo la commissione sul totale dell'ordine senza le spese di spedizione
         $totale = $order->order_total - $order->order_shipping;
+
+        $token = get_post_meta( $order_id, '_addvert_token');
+        $token = $token[0];
         
         // Facciamo la chiamata server side con il metodo token
-        if(!empty($_SESSION['addvert_token'])) {
+        if($token) {
             
             $wrapper = self::check_ssl() ? 'https:' : 'http:';
-            $url = $wrapper . $this->_base . '/api/order/send_order?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$totale.'&token='.$_SESSION['addvert_token'];
+            $url = $wrapper . $this->_base . '/api/order/send_order?ecommerce_id='.$options['addvert_id'].'&secret='.$options['addvert_secret'].'&tracking_id='.$order_id.'&total='.$totale.'&token='.$token;
             
             if(self::use_curl()) {
                 $ch = curl_init();
@@ -119,11 +137,12 @@ class Addvert_Plugin {
                 curl_setopt($ch,CURLOPT_USERAGENT,'WP-Addvert '.self::version);
                 // Non ci interessa avere il contenuto ritornato
                 curl_exec($ch);
+                curl_close($ch);
             } else {
                file_get_contents($url); 
             }
             
-            unset($_SESSION['addvert_token']);
+            
           }
   
         // METODO LEGACY

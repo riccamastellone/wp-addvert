@@ -4,7 +4,7 @@ Donate link:
 Tags: addvert, ecommerce
 Requires at least: 3.3
 Tested up to: 3.8.1
-Stable tag: 1.4.1
+Stable tag: 1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ Visit [http://addvert.it/ecommerce](http://addvert.it/ecommerce) and signup!
 
 == Changelog ==
  
+= 1.5 =
+A lot of bug fixing 
+
 = 1.4.1 =
 Debug tools to help us help you!
 
