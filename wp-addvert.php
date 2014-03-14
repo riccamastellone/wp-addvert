@@ -64,7 +64,6 @@ class Addvert_Plugin {
             define('WP_DEBUG_DISPLAY', true);
 
             echo "<!--\n";
-            echo "sessione: "; var_dump($_SESSION);
             echo "ssl: ".self::check_ssl();
             echo "\ncurl: ".self::use_curl();
             echo "\n";
