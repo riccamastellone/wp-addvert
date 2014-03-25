@@ -3,13 +3,13 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.5
+  Version: 1.5.1
   Author: Riccardo Mastellone
  */
 
 class Addvert_Plugin {
     
-    const version = "1.5";
+    const version = "1.5.1";
     
     protected $_base = "//addvert.it";
     protected $_meta_properties = array();
@@ -31,7 +31,7 @@ class Addvert_Plugin {
             add_action('init',array($this, 'register_session'));
             add_action('wp_head', array($this, 'add_elements')); // Aggiungiamo i meta tag
             add_action('wp_enqueue_scripts', array($this, 'addvert_enqueue_scripts')); // Aggiungiamo lo script per l'add button
-            add_action('woocommerce_single_product_summary', array($this, 'show_addvert_button'), 8); // Aggiungiamo l'add button
+            add_action('woocommerce_share', array($this, 'show_addvert_button'), 8); // Aggiungiamo l'add button
         }
     }
     /**
