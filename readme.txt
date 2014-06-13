@@ -42,7 +42,7 @@ Visit [http://addvert.it/ecommerce](http://addvert.it/ecommerce) and signup!
 == Changelog ==
  
 = 1.6 =
-Nothing special
+Cambiata la posizione dell'add button 
 
 = 1.5 =
 A lot of bug fixing 
