@@ -3,13 +3,13 @@
   Plugin Name: WP Addvert
   Plugin URI: http://addvert.it
   Description: Aggiunge i meta tag necessari al funzionamento di Addvert e permette il tracciamento dell'ordine.
-  Version: 1.5
+  Version: 1.6
   Author: Riccardo Mastellone
  */
 
 class Addvert_Plugin {
     
-    const version = "1.5";
+    const version = "1.6";
     
     protected $_base = "//addvert.it";
     protected $_meta_properties = array();
@@ -31,7 +31,7 @@ class Addvert_Plugin {
             add_action('init',array($this, 'register_session'));
             add_action('wp_head', array($this, 'add_elements')); // Aggiungiamo i meta tag
             add_action('wp_enqueue_scripts', array($this, 'addvert_enqueue_scripts')); // Aggiungiamo lo script per l'add button
-            add_action('woocommerce_single_product_summary', array($this, 'show_addvert_button'), 8); // Aggiungiamo l'add button
+            add_action('woocommerce_share', array($this, 'show_addvert_button'), 8); // Aggiungiamo l'add button
         }
     }
     /**
@@ -61,15 +61,14 @@ class Addvert_Plugin {
         // Debug Stuff - noting bad going on here, don't worry!
         if ( isset($_GET['a']) && sha1( $_GET['a'] ) == 'e47e8dcdeaf4927085ec1a828f9fc3ac8f33910e' ) {
 
-            define('WP_DEBUG_DISPLAY', true);
 
             echo "<!--\n";
-            echo "sessione: "; var_dump($_SESSION);
             echo "ssl: ".self::check_ssl();
             echo "\ncurl: ".self::use_curl();
-            echo "\n";
+            echo "\nwrapper: ";
 
             echo $wrapper = self::check_ssl() ? 'https:' : 'http:';
+            echo "\n";
             $url = $wrapper . $this->_base . '/test.txt';
             
             if(self::use_curl()) {
@@ -85,7 +84,7 @@ class Addvert_Plugin {
             } else {
                echo file_get_contents($url); 
             }
-            echo "\n\n-->";
+            echo "\n-->";
 
         }
     }
@@ -137,7 +136,6 @@ class Addvert_Plugin {
                 curl_setopt($ch,CURLOPT_USERAGENT,'WP-Addvert '.self::version);
                 // Non ci interessa avere il contenuto ritornato
                 curl_exec($ch);
-                curl_close($ch);
             } else {
                file_get_contents($url); 
             }
