@@ -1,10 +1,10 @@
 === WP-Addvert ===
-Contributors: riccardo.mastellone
+Contributors: riccardo.mastellone, Iazel
 Donate link: 
 Tags: addvert, ecommerce
 Requires at least: 3.3
 Tested up to: 4.0
-Stable tag: 1.7
+Stable tag: 1.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ Visit [http://addvert.it/ecommerce](http://addvert.it/ecommerce) and signup!
 
 
 == Changelog ==
+
+= 1.8 =
+Add more options and button themes sync
  
 = 1.7 =
 Introducing the [addvert] shortcode to place the button where you need
